@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/Cicko/gitbook-setup-deploy-heroku#readme",
   "dependencies": {
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "fs-extra": "^2.1.2",
+    "heroku": "^0.2.0"
   }
 }
