@@ -23,7 +23,8 @@ exec("ls .git", function (err, out, code) {
           heroku_url = "https://" + bookName + "-" + process.env.USER + ".herokuapp.com/"
           exec("git remote add heroku " + heroku_url);
           exec("gitbook build", function (err, out, code) {
-            exec("git add _/book")
+            if (err) console.log(err);
+            exec("git add _book")
             exec("git commit -m 'Creating book'")
           });
         });
