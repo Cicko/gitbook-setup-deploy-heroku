@@ -3,9 +3,6 @@
   "version": "1.0.6",
   "description": "This is a plugin for the gitbook-setup module. It configure your book to allow deployment to the heroku platform",
   "main": "index.js",
-  "bin": {
-    "gitbook-setup-deploy-heroku": "./index.js"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
