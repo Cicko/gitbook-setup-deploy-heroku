@@ -2,7 +2,6 @@ const exec = require('child_process').exec;
 var fs = require('fs-extra');
 
 
-
 var contents = fs.readFileSync(".config.book.json", "utf-8");
 contents = JSON.parse(contents);
 var bookName = contents.name;
