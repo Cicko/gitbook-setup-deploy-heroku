@@ -15,15 +15,16 @@ exec("ls .git", function (err, out, code) {
   exec("heroku apps", function (err, out, code) {
     if (err) console.log(err);
     else {
-      if (!out.includes(bookName)) {
-        console.log("app " + bookName + " doesn't exist");
+      if (!out.includes(bookName + "-" + process.env.USER)) {
+        console.log("app " + bookName + "-" + process.env.USER + " doesn't exist");
         exec("heroku create " + bookName + "-" + process.env.USER , function (err, out, code) {
           console.log("Created app: " + out);
           heroku_url = "https://" + bookName + "-" + process.env.USER + ".herokuapp.com/"
           exec("git remote add heroku " + heroku_url);
-          exec("gitbook build")
-          exec("git add _/book")
-          exec("git commit -m 'Creating book'")
+          exec("gitbook build", function (err, out, code) {
+            exec("git add _/book")
+            exec("git commit -m 'Creating book'")
+          });
         });
       }
     }
