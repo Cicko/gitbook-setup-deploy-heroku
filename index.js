@@ -18,6 +18,7 @@ exec("ls .git", function (err, out, code) {
       if (!out.includes(bookName + "-" + process.env.USER)) {
         console.log("app " + bookName + "-" + process.env.USER + " doesn't exist");
         exec("heroku create " + bookName + "-" + process.env.USER , function (err, out, code) {
+          if (err) console.log(err);
           console.log("Created app: " + out);
           heroku_url = "https://" + bookName + "-" + process.env.USER + ".herokuapp.com/"
           exec("git remote add heroku " + heroku_url);
