@@ -36,5 +36,5 @@ writeToREADME();
 
 
 function writeToREADME () {
-  exec ("ola" + " >> README.md");
+  exec ("echo " + contents + " >> README.md");
 }
