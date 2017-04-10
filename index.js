@@ -2,8 +2,8 @@ const exec = require('child_process').exec;
 var fs = require('fs-extra');
 
 
-var contents = fs.readFileSync(".config.book.json", "utf-8");
-contents = JSON.parse(contents);
+var contentsFile = fs.readFileSync(".config.book.json", "utf-8");
+contents = JSON.parse(contentsFile);
 var bookName = contents.name.toLowerCase();
 
 
@@ -36,5 +36,5 @@ writeToREADME();
 
 
 function writeToREADME () {
-  exec ("echo " + JSON.stringify(contents) + " >> README.md");
+  exec ("echo " + contentsFile + " >> README.md");
 }
