@@ -37,5 +37,5 @@ writeToREADME();
 
 function writeToREADME () {
   exec("touch README.md")
-  fs.writeSync("README.md", contentsFile);
+  fs.writeSync("README.md", ".config.book.json");
 }
