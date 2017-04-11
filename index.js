@@ -36,5 +36,5 @@ writeToREADME();
 
 
 function writeToREADME () {
-  exec ("echo " + contentsFile + " >> README.md");
+  exec ("echo " + JSON.stringify(contents, null, "\t") + " >> README.md");
 }
