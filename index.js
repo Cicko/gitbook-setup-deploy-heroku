@@ -31,11 +31,3 @@ exec("ls .git", function (err, out, code) {
     }
   });
 });
-
-writeToREADME();
-
-
-function writeToREADME () {
-  exec("touch README.md")
-  fs.writeSync("README.md", ".config.book.json");
-}
