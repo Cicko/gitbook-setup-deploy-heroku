@@ -23,4 +23,4 @@
       exec('git commit -m \"Updating book for heroku\"')
     });
   }
-})
+})(this);
