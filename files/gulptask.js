@@ -46,25 +46,11 @@
                 });
                 existsHerokuApp(heroku_app_name, function (app) {
                   if (app) {
-                    exec('git remote add heroku ' + app.git_url, function(err, out) {
-                      exec('git push heroku master', function(err, out) {
-                        console.log(out);
-                        console.log("Now you can see your document at " + book_json['web_url']);
-                      })
-                    });
-                    book_json['web_url'] = app.web_url;
-                    fs.unlink('./book.json', function(err) {
-                      fs.writeFileSync('./book.json', JSON.stringify(book_json, null, '\t'));
-                    });
+                    setHerokuData(app);
                   }
                   else {
                     heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
-                      exec('git remote add heroku ' + app.git_url, function(err, out) {
-                        exec('git push heroku master', function(err, out) {
-                          console.log(out);
-                          console.log("Now you can see your document at " + book_json['web_url']);
-                        })
-                      });
+                      setHerokuData(app);
                     }).catch(function(e) {
                       console.log(e);
                     });
@@ -75,6 +61,19 @@
           }
         })
       });
+    });
+  }
+
+  function setHerokuData (app) {
+    book_json['web_url'] = app.web_url;
+    fs.unlink('./book.json', function(err) {
+      fs.writeFileSync('./book.json', JSON.stringify(book_json, null, '\t'));
+    });
+    exec('git remote add heroku ' + app.git_url, function(err, out) {
+      exec('git push heroku master', function(err, out) {
+        console.log(out);
+        console.log("Now you can see your document at " + app.web_url);
+      })
     });
   }
 
