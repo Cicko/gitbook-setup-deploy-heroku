@@ -26,6 +26,7 @@
   "dependencies": {
     "express": "^4.15.2",
     "fs-extra": "^2.1.2",
-    "heroku": "^0.2.0"
+    "heroku": "^0.2.0",
+    "heroku-client": "^3.0.2"
   }
 }
