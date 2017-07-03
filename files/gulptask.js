@@ -14,6 +14,12 @@
   var heroku_app_name = book_name + "-" + author + '-gs';
 
   gulp.task('deploy-heroku', [], function() {
+    exec ('which heroku', function (err, out) {
+      if (out.length == 0) {
+        console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
+        process.exit();
+      }
+    })
     if (!fs.existsSync('_book')) {
         exec('gitbook build', function (err, out) {
           updateGit();
