@@ -28,6 +28,7 @@ function existsHerokuApp (name,callback) {
 }
 
 function setHerokuData (app) {
+  console.log(app);
   configFile['heroku_url'] = app.heroku_url;
   console.log("Heroku url: " + configFile['heroku_url'])
   fs.unlink('.config.book.json', function(err) {
