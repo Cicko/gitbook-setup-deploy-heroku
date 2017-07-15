@@ -2,7 +2,8 @@
 (function () {
   var gulp = require('gulp');
   var exec = require('child_process').exec;
-  var configFile = require('./config.book.json');
+  var path = require('path');
+  var configFile = require(path.join(process.cwd(), '.config.book.json'));;
 
   gulp.task('deploy-heroku', [], function() {
       exec('git add .', (err, out) => {

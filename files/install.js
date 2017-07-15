@@ -7,7 +7,7 @@ var Heroku = require('heroku-client');
 var heroku;
 var path = require('path')
 var fs = require('fs-extra');
-var configFile = require(path.join(process.cwd(),'config.book.json'));
+var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var book_name = configFile.title;
 var author = configFile.author;
 var heroku_url = configFile.heroku_url;
