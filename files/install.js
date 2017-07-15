@@ -59,7 +59,7 @@ module.exports.install = (callback) => {
         }
         else {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
-            callback("Created heroku app " + heroku_app_name);
+            callback(null,"Created heroku app " + heroku_app_name);
             setHerokuData(app);
           }).catch(function(e) {
             console.log(e);
