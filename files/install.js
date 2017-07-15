@@ -18,7 +18,6 @@ function existsHerokuApp (name,callback) {
   var existe = false;
   heroku.get('/apps').then(apps => {
     apps.forEach (function (app,i) {
-      console.log(app.name + " and name is: " + name);
       if (app.name == name) {
         existe = app;
       }
@@ -28,7 +27,7 @@ function existsHerokuApp (name,callback) {
 }
 
 function setHerokuData (app) {
-  configFile['heroku_url'] = app.heroku_url;
+  configFile['heroku_url'] = app.web_url;
   console.log("Heroku url: " + configFile['heroku_url'])
   fs.unlink('.config.book.json', function(err) {
     fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
@@ -61,8 +60,6 @@ module.exports.install = (callback) => {
         }
         else {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
-            console.log("APP: ");
-            console.log(app);
             setHerokuData(app);
           }).catch(function(e) {
             console.log(e);
