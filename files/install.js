@@ -8,8 +8,8 @@ var heroku;
 var path = require('path')
 var fs = require('fs-extra');
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
-var book_name = configFile.title;
-var author = configFile.author;
+var book_name = configFile.name;
+var author = configFile.authors[0];
 var heroku_url = configFile.heroku_url;
 
 var heroku_app_name = book_name + "-" + author + '-gs';
