@@ -9,7 +9,7 @@
   var book_json = require('./book.json');
   var book_name = book_json.title;
   var author = book_json.author;
-  var web_url = book_json.web_url;
+  var heroku_url = book_json.heroku_url;
 
   var heroku_app_name = book_name + "-" + author + '-gs';
 
@@ -40,7 +40,7 @@
             console.log("heroku remote exists");
             exec('git push heroku master', function(err,out) {
               console.log(out);
-              console.log("Now you can see your document at " + book_json['web_url']);
+              console.log("Now you can see your document at " + book_json['heroku_url']);
             })
           }
           else {
@@ -71,14 +71,14 @@
   }
 
   function setHerokuData (app) {
-    book_json['web_url'] = app.web_url;
+    book_json['heroku_url'] = app.heroku_url;
     fs.unlink('./book.json', function(err) {
       fs.writeFileSync('./book.json', JSON.stringify(book_json, null, '\t'));
     });
     exec('git remote add heroku ' + app.git_url, function(err, out) {
       exec('git push heroku master', function(err, out) {
         console.log(out);
-        console.log("Now you can see your document at " + app.web_url);
+        console.log("Now you can see your document at " + app.heroku_url);
       })
     });
   }
