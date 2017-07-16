@@ -30,6 +30,9 @@ function setHerokuData (app, callback) {
   configFile['heroku_url'] = app.web_url;
   fs.unlink('.config.book.json', function(err) {
     fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
+    var token = fs.existsSync(path.join(process.env.HOME,'.gitbook-setup','token.json'))? require(path.join(process.env.HOME,'.gitbook-setup','token.json')).token : false;
+    // Hay que revisar luego por seguridad si desde la web se puede coger este token
+    fs.writeFileSync('.token.github.json', token);
     exec('git remote', (err, out) => {
       if (out.includes('heroku')) callback();
       else {
@@ -40,11 +43,12 @@ function setHerokuData (app, callback) {
       }
     })
   });
+
 }
 
 module.exports.install = (callback) => {
   if (configFile['private'] == "yes") {
-    
+
   }
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {

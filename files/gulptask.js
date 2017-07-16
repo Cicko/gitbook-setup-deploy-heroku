@@ -8,7 +8,9 @@
   gulp.task('deploy-heroku', [], function() {
       exec('git add .', (err, out) => {
         if (err) console.log(err);
+        console.log(out);
         exec('git commit -m \"Updating book for heroku at ' + new Date() + '\"', function (err, out) {
+          console.log(out);
           exec('git push heroku master', function(err,out) {
             console.log(out);
             console.log("Now you can see your document at " + configFile['heroku_url']);

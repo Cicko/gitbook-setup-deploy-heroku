@@ -3,10 +3,11 @@ var passport = require('passport');
 var Strategy = require('passport-github').Strategy;
 var github = require('octonode');
 var path = require('path');
+var fs = require('fs-extra');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = configFile.heroku_url.concat('/login/github/return');
-const TOKEN = fs.existsSync(path.join(process.env.HOME,'.gitbook-setup','token.json'))? require(path.join(process.env.HOME,'.gitbook-setup','token.json')).token : null;
+const TOKEN = path.join(process.cwd(),'.token.github.json');
 
 console.log("Callback URL IS: " + callbackURL_);
 
