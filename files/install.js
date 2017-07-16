@@ -3,6 +3,7 @@
 // There the remote url for the app have to be added to git.
 
 var exec = require('child_process').exec;
+var inquirer = require('inquirer')
 var Heroku = require('heroku-client');
 var heroku;
 var path = require('path')
@@ -11,8 +12,11 @@ var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var book_name = configFile.name;
 var author = configFile.authors[0];
 var heroku_url = configFile.heroku_url;
-
 var heroku_app_name = book_name + "-" + author + '-gs';
+var launcher = require( 'launch-browser' );
+var Tacks = require('tacks');
+var File = Tacks.File;
+var Dir = Tacks.Dir;
 
 function existsHerokuApp (name,callback) {
   var existe = false;
@@ -43,13 +47,10 @@ function setHerokuData (app, callback) {
       }
     })
   });
-
 }
 
-module.exports.install = (callback) => {
-  if (configFile['private'] == "yes") {
 
-  }
+function setup (callback) {
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {
       console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
@@ -57,9 +58,9 @@ module.exports.install = (callback) => {
     }
   });
   if (!fs.existsSync('_book')) {
-      exec('gitbook build', function (err, out) {
-        if (err) console.log(err);
-      });
+    exec('gitbook build', function (err, out) {
+      if (err) console.log(err);
+    });
   }
   exec('heroku auth:token', function(err, out) {
     if (!err) {
@@ -69,14 +70,14 @@ module.exports.install = (callback) => {
       existsHerokuApp(heroku_app_name, function (app) {
         if (app) {
           setHerokuData(app, (err) => {
-            if (err) callback(err);
+            if (err) callback(err, null);
             else callback(null,"Created heroku app " + heroku_app_name);
           });
         }
         else {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
             setHerokuData(app, (err) => {
-              if (err) callback(err);
+              if (err) callback(err, null);
               else callback(null,"Created heroku app " + heroku_app_name);
             });
           }).catch(function(e) {
@@ -86,4 +87,63 @@ module.exports.install = (callback) => {
       });
     }
   });
+}
+
+module.exports.install = (callback) => {
+  if (configFile['private'] == "yes") {
+    var base_url = 'https://github.com/settings/applications/new?';
+    var name_param_url = 'oauth_application[name]=' + heroku_app_name;
+    var url_param_url = '&oauth_application[url]=' + heroku_url;
+    var desc_param_url = '&oauth_application[description]=' + configFile['description'];
+    var callback_param_url = '&oauth_application[callback_url]=' + path.join(heroku_url,'/github/auth/return';
+    var oauth_register_url = base_url + name_param_url + url_param_url + desc_param_url + callback_param_url;
+
+    inquirer.prompt([
+      {
+        type:'input',
+        name: 'nothing',
+        message: 'Now browser will be opened to create oauth app. YOU HAVE TO COPY the app clientID and clientSecret',
+        filter: function (val) {
+          launcher(oauth_register_url, { browser: ['chromium','chrome', 'firefox', 'safari'] }, function (e, browser) {
+            if(e) return console.log(e);
+            //browser.on('stop', function(code){
+            //});
+          });
+          return val;
+        }
+      },
+      {
+        type: 'input',
+        name: 'clientID',
+        message: 'Put the client ID of the oauth App: ',
+        validate: function (value) {
+          if (!value) return false;
+          return true;
+        }
+      },
+      {
+        type: 'input',
+        name: 'clientSecret',
+        message: 'Put the client Secret of the oauth App: ',
+        validate: function (value) {
+          if (!value) return false;
+          return true;
+        }
+      }]).then((answers) => {
+        var oauth_file = new Tacks(Dir({
+          '.oauth.json' : File(JSON.stringify({
+            clientID: answers.clientID,
+            clientSecret: answers.clientSecret,
+            callbackURL: path.join(heroku_url,'/github/auth/return'
+          }, null, "\t"))
+        }));
+        oauth_file.create(process.cwd());
+        setup((err, msg) => {
+          callback(err, msg);
+        });
+      });
+  }
+  else {
+    setup();
+  }
 }

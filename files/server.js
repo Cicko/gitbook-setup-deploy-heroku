@@ -52,7 +52,7 @@ app.listen(port, function() {
 
 
 app.get('/', (request, response) => {
-  if (fs.existsSync('oauth.json')) {
+  if (fs.existsSync('.oauth.json')) {
     checkAuthorization((err, profile) => {
       if (err) console.log(err);
       else response.render ('index');
