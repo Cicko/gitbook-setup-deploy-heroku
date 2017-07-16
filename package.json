@@ -27,6 +27,10 @@
     "express": "^4.15.2",
     "fs-extra": "^2.1.2",
     "heroku": "^0.2.0",
-    "heroku-client": "^3.0.2"
+    "heroku-client": "^3.0.2",
+    "octonode": "^0.7.13",
+    "passport": "^0.3.2",
+    "passport-github": "^1.1.0",
+    "path": "^0.12.7"
   }
 }
