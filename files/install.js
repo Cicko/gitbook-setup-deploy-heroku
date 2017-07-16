@@ -31,9 +31,6 @@ function setHerokuData (app) {
   fs.unlink('.config.book.json', function(err) {
     fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
   });
-  exec('git remote add heroku ' + app.git_url, function(err, out) {
-    if (err) console.log(err);
-  });
 }
 
 module.exports.install = (callback) => {
