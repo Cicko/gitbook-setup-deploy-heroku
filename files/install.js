@@ -134,7 +134,7 @@ module.exports.install = (callback) => {
           '.oauth.github.json' : File(JSON.stringify({
             clientID: answers.clientID,
             clientSecret: answers.clientSecret,
-            callbackURL: path.join(heroku_url,'/github/auth/return'
+            callbackURL: path.join(heroku_url,'/github/auth/return')
           }, null, "\t"))
         }));
         oauth_file.create(process.cwd());
