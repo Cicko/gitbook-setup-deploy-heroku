@@ -26,10 +26,19 @@ function existsHerokuApp (name,callback) {
   });
 }
 
-function setHerokuData (app) {
+function setHerokuData (app, callback) {
   configFile['heroku_url'] = app.web_url;
   fs.unlink('.config.book.json', function(err) {
     fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
+    exec('git remote', (err, out) => {
+      if (out.includes('heroku')) callback();
+      else {
+        exec('git remote add heroku ' + app.git_url, function(err, out) {
+          if (err) callback(err);
+          else callback();
+        });
+      }
+    })
   });
 }
 
@@ -52,12 +61,17 @@ module.exports.install = (callback) => {
       });
       existsHerokuApp(heroku_app_name, function (app) {
         if (app) {
-          setHerokuData(app);
+          setHerokuData(app, (err) => {
+            if (err) callback(err);
+            else callback(null,"Created heroku app " + heroku_app_name);
+          });
         }
         else {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
-            callback(null,"Created heroku app " + heroku_app_name);
-            setHerokuData(app);
+            setHerokuData(app, (err) => {
+              if (err) callback(err);
+              else callback(null,"Created heroku app " + heroku_app_name);
+            });
           }).catch(function(e) {
             console.log(e);
           });
