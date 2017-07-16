@@ -7,7 +7,8 @@ var fs = require('fs-extra');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'login/github/return');
-const oauth_file = path.join(process.cwd(),'.oauth.github.json');
+const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
+const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
 
 console.log("Callback URL IS: " + callbackURL_);
 

@@ -36,7 +36,12 @@ function setHerokuData (app, callback) {
     fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
     var token = fs.existsSync(path.join(process.env.HOME,'.gitbook-setup','token.json'))? require(path.join(process.env.HOME,'.gitbook-setup','token.json')).token : false;
     // Hay que revisar luego por seguridad si desde la web se puede coger este token
-    fs.writeFileSync('.token.github.json', token);
+    var token_file = new Tacks(Dir({
+      '.token.github.json' : File(JSON.stringify({
+        token: token
+      }, null, "\t"))
+    }));
+    token_file.create(process.cwd());
     exec('git remote', (err, out) => {
       if (out.includes('heroku')) callback();
       else {
