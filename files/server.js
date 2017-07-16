@@ -4,7 +4,6 @@ var Strategy = require('passport-github').Strategy;
 var github = require('octonode');
 var path = require('path');
 var app = express();
-var pkg = require(path.join(basePath, 'package.json'));
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = configFile.heroku_url.concat('/login/github/return');
 const TOKEN = fs.existsSync(path.join(process.env.HOME,'.gitbook-setup','token.json'))? require(path.join(process.env.HOME,'.gitbook-setup','token.json')).token : null;
