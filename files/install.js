@@ -43,6 +43,9 @@ function setHerokuData (app, callback) {
 }
 
 module.exports.install = (callback) => {
+  if (configFile['private'] == "yes") {
+    
+  }
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {
       console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
