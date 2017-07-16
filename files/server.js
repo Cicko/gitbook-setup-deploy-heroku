@@ -6,7 +6,7 @@ var path = require('path');
 var fs = require('fs-extra');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
-var callbackURL_ = configFile.heroku_url.concat('/login/github/return');
+var callbackURL_ = path.join(configFile.heroku_url, 'login/github/return');
 const TOKEN = path.join(process.cwd(),'.token.github.json');
 
 console.log("Callback URL IS: " + callbackURL_);
@@ -52,7 +52,7 @@ app.listen(port, function() {
 
 
 app.get('/', (request, response) => {
-  if (fs.existsSync(oauth.json)) {
+  if (fs.existsSync('oauth.json')) {
     checkAuthorization((err, profile) => {
       if (err) console.log(err);
       else response.render ('index');
