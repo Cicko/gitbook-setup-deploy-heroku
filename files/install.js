@@ -131,7 +131,7 @@ module.exports.install = (callback) => {
         }
       }]).then((answers) => {
         var oauth_file = new Tacks(Dir({
-          '.oauth.json' : File(JSON.stringify({
+          '.oauth.github.json' : File(JSON.stringify({
             clientID: answers.clientID,
             clientSecret: answers.clientSecret,
             callbackURL: path.join(heroku_url,'/github/auth/return'

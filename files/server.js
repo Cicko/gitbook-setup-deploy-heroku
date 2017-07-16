@@ -7,7 +7,7 @@ var fs = require('fs-extra');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'login/github/return');
-const TOKEN = path.join(process.cwd(),'.token.github.json');
+const oauth_file = path.join(process.cwd(),'.oauth.github.json');
 
 console.log("Callback URL IS: " + callbackURL_);
 
@@ -15,9 +15,9 @@ function checkAuthorization (callback) {
   var org = require('./.config.book.json').organization;
 
   passport.use(new Strategy({
-    clientID: datos_config.clientID,
-    clientSecret: datos_config.clientSecret,
-    callbackURL: callbackURL_
+    clientID: oauth_file.clientID,
+    clientSecret: oauth_file.clientSecret,
+    callbackURL: oauth_file.callbackURL
   },
   function(accessToken, refreshToken, profile, cb) {
 
@@ -38,11 +38,6 @@ function checkAuthorization (callback) {
 }
 
 
-function registrateOauthApp() {
-
-}
-
-
 //app.use('/', express.static(__dirname + '/_book'));
 var port = Number(process.env.PORT || 5000);
 
@@ -59,6 +54,6 @@ app.get('/', (request, response) => {
     });
   }
   else {
-    response.render("https://github.com/settings/applications/new?oauth_application[name]=ruda&oauth_application[url]=url&oauth_application[description]=&oauth_application[callback_url]=cucu");
+    response.send("You didn't have installed your gulp deployment correctly");
   }
 });
