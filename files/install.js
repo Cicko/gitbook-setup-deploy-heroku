@@ -95,7 +95,7 @@ module.exports.install = (callback) => {
     var name_param_url = 'oauth_application[name]=' + heroku_app_name;
     var url_param_url = '&oauth_application[url]=' + heroku_url;
     var desc_param_url = '&oauth_application[description]=' + configFile['description'];
-    var callback_param_url = '&oauth_application[callback_url]=' + (path.join(heroku_url,'github/auth/return'));
+    var callback_param_url = '&oauth_application[callback_url]=' + heroku_url + 'github/auth/return';
     var oauth_register_url = base_url + name_param_url + url_param_url + desc_param_url + callback_param_url;
 
     inquirer.prompt([
@@ -134,7 +134,7 @@ module.exports.install = (callback) => {
           '.oauth.github.json' : File(JSON.stringify({
             clientID: answers.clientID,
             clientSecret: answers.clientSecret,
-            callbackURL: path.join(heroku_url,'/github/auth/return')
+            callbackURL: heroku_url + '/github/auth/return'
           }, null, "\t"))
         }));
         oauth_file.create(process.cwd());
