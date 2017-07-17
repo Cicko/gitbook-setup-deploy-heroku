@@ -4,6 +4,9 @@ var Strategy = require('passport-github').Strategy;
 var github = require('octonode');
 var path = require('path');
 var fs = require('fs-extra');
+var session = require('express-session');
+var bodyParser = require('body-parser')
+var methodOverride = require('method-override');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
@@ -20,6 +23,16 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(methodOverride());
+app.use(session({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
+// Initialize Passport!  Also use passport.session() middleware, to support
+// persistent login sessions (recommended).
+app.use(passport.initialize());
+app.use(passport.session());
+
 passport.use(new Strategy({
   clientID: oauth_file.clientID,
   clientSecret: oauth_file.clientSecret,
@@ -33,11 +46,12 @@ function(accessToken, refreshToken, profile, cb) {
   ghorg.member(profile.username, (err,result) =>
   {
     if(err) console.log(err);
-    console.log("Result:"+result);
+
+    console.log("Result: " + result);
     if(result == true)
-    return callback(null, profile);
+      return callback(null, profile);
     else
-    return callback(null, null);
+      return callback(null, null);
   });
   // return cb(null, profile);
 }));
@@ -50,13 +64,17 @@ app.listen(port, function() {
 });
 
 
-app.get('/',
-   passport.authenticate('github', { scope: [ 'user:email' ] }),
-   function(req, res) {
-     res.render('index');
-   });
+app.get('/', (req, res) => {
+  res.render('index');
+});
 
 
+
+app.get('/github/auth',
+  passport.authenticate('github', { scope: [ 'user:email' ] }),
+  function(req, res) {
+    console.log("Dicen que esto no se ejecuta");
+  });
 
 
 app.get("/github/auth/return",
@@ -67,5 +85,5 @@ app.get("/github/auth/return",
 
 
 app.get('/fail', (req, res) => {
-  res.send("FAILED");
+  res.send("FAILED authentication");
 });
