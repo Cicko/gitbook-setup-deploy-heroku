@@ -48,6 +48,14 @@ function setHerokuData (app, callback) {
 
 
 function setup (callback) {
+  exec ('gulp -T', (err, out) => {
+    if (err)
+      exec ('npm install gulp', (err, out) => {
+        var msg = "gulp installed locally";
+        console.log(msg);
+        callback(msg);
+      })
+  })
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {
       console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
