@@ -6,40 +6,43 @@ var path = require('path');
 var fs = require('fs-extra');
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
-var callbackURL_ = path.join(configFile.heroku_url, 'login/github/return');
+var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
 const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
 const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
 
 console.log("Callback URL IS: " + callbackURL_);
 
-function checkAuthorization (callback) {
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+passport.use(new Strategy({
+  clientID: oauth_file.clientID,
+  clientSecret: oauth_file.clientSecret,
+  callbackURL: oauth_file.callbackURL
+},
+function(accessToken, refreshToken, profile, cb) {
   var org = require('./.config.book.json').organization;
+  var client = github.client(TOKEN);
+  var ghorg = client.org(org);
 
-  passport.use(new Strategy({
-    clientID: oauth_file.clientID,
-    clientSecret: oauth_file.clientSecret,
-    callbackURL: oauth_file.callbackURL
-  },
-  function(accessToken, refreshToken, profile, cb) {
-
-    var client = github.client(TOKEN);
-    var ghorg = client.org(org);
-
-    ghorg.member(profile.username, (err,result) =>
-    {
-      if(err) console.log(err);
-      console.log("Result:"+result);
-      if(result == true)
-        return callback(null, profile);
-      else
-        return callback(null, null);
-    });
-    // return cb(null, profile);
-  }));
-}
+  ghorg.member(profile.username, (err,result) =>
+  {
+    if(err) console.log(err);
+    console.log("Result:"+result);
+    if(result == true)
+    return callback(null, profile);
+    else
+    return callback(null, null);
+  });
+  // return cb(null, profile);
+}));
 
 
-//app.use('/', express.static(__dirname + '/_book'));
 var port = Number(process.env.PORT || 5000);
 
 app.listen(port, function() {
@@ -47,14 +50,20 @@ app.listen(port, function() {
 });
 
 
-app.get('/', (request, response) => {
-  if (fs.existsSync('.oauth.github.json')) {
-    checkAuthorization((err, profile) => {
-      if (err) console.log(err);
-      else response.render ('index');
-    });
-  }
-  else {
-    response.send("You didn't have installed your gulp deployment correctly");
-  }
+app.get('/', passport.authenticate('github', { scope: [ 'user:email' ] }), (request, response) => {
+   res.render('index');
+});
+
+
+
+
+app.get("/github/auth/return",
+  passport.authenticate('github', { failureRedirect: '/fail' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+
+app.get('/fail', (req, res) => {
+  res.send("FAILED");
 });
