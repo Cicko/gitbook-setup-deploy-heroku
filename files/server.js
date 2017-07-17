@@ -8,7 +8,7 @@ var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
 const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
-const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
+//const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
 
 console.log("Callback URL IS: " + callbackURL_);
 
@@ -27,7 +27,7 @@ passport.use(new Strategy({
 },
 function(accessToken, refreshToken, profile, cb) {
   var org = require('./.config.book.json').organization;
-  var client = github.client(TOKEN);
+  var client = github.client(accessToken);
   var ghorg = client.org(org);
 
   ghorg.member(profile.username, (err,result) =>
@@ -50,9 +50,11 @@ app.listen(port, function() {
 });
 
 
-app.get('/', passport.authenticate('github', { scope: [ 'user:email' ] }), (request, response) => {
-   res.render('index');
-});
+app.get('/',
+   passport.authenticate('github', { scope: [ 'user:email' ] }),
+   function(req, res) {
+     res.render('index');
+   });
 
 
 
