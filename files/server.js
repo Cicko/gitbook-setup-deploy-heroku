@@ -23,7 +23,7 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-
+app.use(express.static(__dirname + '/_book'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
