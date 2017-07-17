@@ -107,7 +107,7 @@ module.exports.install = (callback) => {
       {
         type:'input',
         name: 'nothing',
-        message: 'Now browser will be opened to create oauth app. YOU HAVE TO COPY the app clientID and clientSecret',
+        message: 'Now browser will be opened to create oauth app. YOU HAVE TO COPY the app clientID and clientSecret (Press Enter)',
         filter: function (val) {
           launcher(oauth_register_url, { browser: ['chromium','chrome', 'firefox', 'safari'] }, function (e, browser) {
             if(e) return console.log(e);
