@@ -15,7 +15,7 @@ const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
 
 var engines = require('consolidate');
 
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/_book');
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
 
