@@ -23,7 +23,7 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-app.use(express.static(__dirname + '/_book'));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride());
@@ -64,13 +64,7 @@ app.listen(port, function() {
 });
 
 
-app.get('/', (req, res) => {
-  res.render('index');
-});
-
-
-
-app.get('/github/auth',
+app.get('/',
   passport.authenticate('github', { scope: [ 'user:email' ] }),
   function(req, res) {
     console.log("Dicen que esto no se ejecuta");
@@ -80,10 +74,12 @@ app.get('/github/auth',
 app.get("/github/auth/return",
   passport.authenticate('github', { failureRedirect: '/fail' }),
   function(req, res) {
-    res.redirect('/');
+    res.render('index')
   });
 
 
 app.get('/fail', (req, res) => {
   res.send("FAILED authentication");
 });
+
+app.use(express.static(__dirname + '/_book'));
