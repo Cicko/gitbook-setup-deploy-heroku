@@ -1,6 +1,6 @@
 {
   "name": "gitbook-setup-deploy-heroku",
-  "version": "1.1.43",
+  "version": "1.1.44",
   "description": "This is a plugin for the gitbook-setup module. It configure your book to allow deployment to the heroku platform",
   "main": "index.js",
   "scripts": {
