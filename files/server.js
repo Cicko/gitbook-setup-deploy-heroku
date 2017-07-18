@@ -12,6 +12,19 @@ var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
 const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
 //const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
+const GitHubApi = require("github");
+var github = new GitHubApi({
+  // optional
+  debug: true,
+  protocol: "https",
+  host: "api.github.com", // should be api.github.com for GitHub
+  headers: {
+      "user-agent": "My-Cool-GitHub-App" // GitHub is happy with a unique user agent
+  },
+  Promise: require('bluebird'),
+  followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
+  timeout: 5000
+});
 
 var engines = require('consolidate');
 
@@ -47,7 +60,30 @@ passport.use(new Strategy({
 },
 function(accessToken, refreshToken, profile, done) {
   var org = require('./.config.book.json').organization;
-  var client = github.client(accessToken);
+  github.authenticate({
+    type: 'token',
+    token: accessToken
+  });
+
+  github.orgs.getMembers({
+    org: org
+  }, (err, out) => {
+    var members = out.data;
+    var is_member = false;
+    github.users.get({}, (err, out) => {
+      members.forEach ((owner, inx) => {
+        if (out.data.login == owner.login) {
+          done(null, out.data);
+          is_member = true;
+        }
+        else if (inx + 1 == members.length && !is_member) {
+          done(null, null);
+        }
+      })
+    })
+  })
+
+  /*var client = github.client(accessToken);
   var ghorg = client.org(org);
 
   console.log("PROFILE: ");
@@ -67,6 +103,7 @@ function(accessToken, refreshToken, profile, done) {
       done(null, profile);
   });
   // return cb(null, profile);
+  */
 }));
 
 
@@ -87,6 +124,7 @@ app.get('/',
 app.get("/github/auth/return",
   passport.authenticate('github', { failureRedirect: '/fail' }),
   function(req, res) {
+    //console.log(res);
     res.redirect('/content');
   });
 
