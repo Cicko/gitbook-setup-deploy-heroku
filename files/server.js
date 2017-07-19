@@ -7,12 +7,14 @@ var fs = require('fs-extra');
 var session = require('express-session');
 var bodyParser = require('body-parser')
 var methodOverride = require('method-override');
+
 var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
 var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
 const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
 //const TOKEN = require(path.join(process.cwd(),'.token.github.json')).token;
 const GitHubApi = require("github");
+/*
 var github = new GitHubApi({
   // optional
   debug: true,
@@ -25,13 +27,13 @@ var github = new GitHubApi({
   followRedirects: false, // default: true; there's currently an issue with non-get redirects, so allow ability to disable follow-redirects
   timeout: 5000
 });
+*/
 
 var engines = require('consolidate');
 
 app.set('views', __dirname + '/_book');
 app.engine('html', engines.mustache);
 app.set('view engine', 'html');
-
 console.log("Callback URL IS: " + callbackURL_);
 
 passport.serializeUser(function(user, done) {
@@ -52,7 +54,6 @@ app.use(methodOverride());
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 passport.use(new Strategy({
   clientID: oauth_file.clientID,
   clientSecret: oauth_file.clientSecret,
@@ -60,6 +61,8 @@ passport.use(new Strategy({
 },
 function(accessToken, refreshToken, profile, done) {
   var org = require('./.config.book.json').organization;
+
+/*
   github.authenticate({
     type: 'token',
     token: accessToken
@@ -82,28 +85,43 @@ function(accessToken, refreshToken, profile, done) {
       })
     })
   })
+*/
 
-  /*var client = github.client(accessToken);
+
+  // My personal access token. That is problem because the user have to put its token to check if is member of a organization (private organization).
+  var client = github.client("61c3f65de1d82d24c8effd01ea6ffb2a9c6ae7bf");
+  var ghme = client.me();
+
+  ghme.info((err, out) => {
+    console.log("GHME INFO")
+    if (err) console.log(err);
+    else console.log(out);
+  });
+
+
   var ghorg = client.org(org);
 
-  console.log("PROFILE: ");
-  console.log(profile);
 
-  console.log("OLRG:");
-  console.log(ghorg);
+  /*
+  ghorg.members((err, result) => {
+    if (err) console.log(err);
+    else console.log(result);
+  })
+  */
 
-  ghorg.member(profile.username, (err,result) =>
+
+  ghorg.member(profile.username, (err,result, whatis) =>
   {
     if(err) console.log(err);
 
-    console.log("Result: " + result);
+    console.log("Result: " + result); // Always is FALSE
     if(result == true)
       done(null, profile);
     else
-      done(null, profile);
+      done(null, null);
   });
   // return cb(null, profile);
-  */
+
 }));
 
 
@@ -134,7 +152,7 @@ app.get("/content", (req, res) => {
 
 
 app.get('/fail', (req, res) => {
-  res.send("FAILED authentication");
+  res.send("<h1>FAILED AUTHENTICATION</h1>");
 });
 
 app.use(express.static(__dirname + '/_book'));
