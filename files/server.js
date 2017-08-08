@@ -45,6 +45,7 @@ passport.use(new Strategy({
   scope: ['user','repo']
 },
 function(accessToken, refreshToken, profile, done) {
+  profile.token = accessToken;
     done(null,profile)
 }));
 
@@ -68,24 +69,18 @@ app.get("/github/auth/return",
   passport.authenticate('github', { failureRedirect: '/fail' }),
   function(req, res) {
     organizacion = require('./.config.book.json').organization;
-    var client = github.client({id : oauth_file.clientID, secret: oauth_file.clientSecret});
-
+    var client = github.client(req.user.token);
 
     var ghorg = client.org(organizacion);
 
+    console.log("USERNAME: " + req.user.username);
 
-    ghorg.member(req.user.username, (member) => {
-      console.log("IS MEMBER??: ");
-      console.log(member);
-      if (member) res.redirect('/content');
-      else res.redirect('/fail')
-    });
-
-/*
     client.get(`/users/${req.user.username}/orgs`, {}, function (err, status, body, headers) {
       if (body.length == 0) res.redirect('/fail');
       var founded = false;
+      console.log("ORGSSSSS")
       body.forEach((org,inx) => {
+        console.log(org);
         if (org.login == organizacion) {
           founded = true;
           res.redirect('/content');
@@ -95,7 +90,7 @@ app.get("/github/auth/return",
         }
       });
     });
-    */
+
 });
 
 app.get("/content", (req, res) => {
