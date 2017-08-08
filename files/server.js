@@ -70,6 +70,18 @@ app.get("/github/auth/return",
     organizacion = require('./.config.book.json').organization;
     var client = github.client({id : oauth_file.clientID, secret: oauth_file.clientSecret});
 
+
+    var ghorg = client.org(organizacion);
+
+
+    ghorg.member(req.user.username, (member) => {
+      console.log("IS MEMBER??: ");
+      console.log(member);
+      if (member) res.redirect('/content');
+      else res.redirect('/fail')
+    });
+
+/*
     client.get(`/users/${req.user.username}/orgs`, {}, function (err, status, body, headers) {
       if (body.length == 0) res.redirect('/fail');
       var founded = false;
@@ -83,6 +95,7 @@ app.get("/github/auth/return",
         }
       });
     });
+    */
 });
 
 app.get("/content", (req, res) => {
@@ -95,4 +108,3 @@ app.get('/fail', (req, res) => {
 });
 
 app.use(express.static(__dirname + '/_book'));
-
