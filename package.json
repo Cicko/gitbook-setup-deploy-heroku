@@ -27,6 +27,7 @@
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "consolidate": "^0.14.5",
+    "copy-to-clipboard": "^3.0.8",
     "express": "^4.15.2",
     "express-session": "^1.15.3",
     "fs-extra": "^2.1.2",
