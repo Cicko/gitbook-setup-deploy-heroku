@@ -1,183 +1,105 @@
-// There the heroku app should be created.
-// There the oauth app should be created.
-// There the remote url for the app have to be added to git.
-
-var exec = require('child_process').exec;
-var inquirer = require('inquirer')
-var Heroku = require('heroku-client');
-var heroku;
-var path = require('path')
+var express = require('express');
+var passport = require('passport');
+var Strategy = require('passport-github').Strategy;
+var github = require('octonode');
+var path = require('path');
 var fs = require('fs-extra');
+var session = require('express-session');
+var bodyParser = require('body-parser')
+var methodOverride = require('method-override');
+
+var app = express();
 var configFile = require(path.join(process.cwd(),'.config.book.json'));
-var book_name = configFile.name;
-var author = configFile.authors[0];
-var heroku_app_name = book_name + "-" + author + '-gs';
-var heroku_url = "https://" + heroku_app_name + ".herokuapp.com";
-var launcher = require( 'launch-browser' );
-var Tacks = require('tacks');
-var copy = require('copy-to-clipboard')
-const { URL } = require('url');
-var File = Tacks.File;
-var Dir = Tacks.Dir;
+var callbackURL_ = path.join(configFile.heroku_url, 'github/auth/return');
+const oauth_file = require(path.join(process.cwd(),'.oauth.github.json'));
+const GitHubApi = require("github");
 
-function existsHerokuApp (name,callback) {
-  var existe = false;
-  heroku.get('/apps').then(apps => {
-    apps.forEach (function (app,i) {
-      if (app.name == name) {
-        existe = app;
-      }
-      if (i+1 == apps.length) callback(existe);
+var engines = require('consolidate');
+
+var organizacion;
+
+app.set('views', __dirname + '/_book');
+app.engine('html', engines.mustache);
+app.set('view engine', 'html');
+console.log("Callback URL IS: " + callbackURL_);
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(methodOverride());
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new Strategy({
+  clientID: oauth_file.clientID,
+  clientSecret: oauth_file.clientSecret,
+  callbackURL: oauth_file.callbackURL,
+  scope: ['user','repo']
+},
+function(accessToken, refreshToken, profile, done) {
+  profile.token = accessToken;
+    done(null,profile)
+}));
+
+
+
+
+var port = Number(process.env.PORT || 5000);
+
+app.listen(port, function() {
+    console.log('Your files will be served through this web server in port ' + port);
+});
+
+
+app.get('/',
+  passport.authenticate('github', { scope: [ 'user:email' ] }),
+  function(req, res) {
+});
+
+
+app.get("/github/auth/return",
+  passport.authenticate('github', { failureRedirect: '/fail' }),
+  function(req, res) {
+    organizacion = require('./.config.book.json').organization;
+    var client = github.client(req.user.token);
+
+    var ghorg = client.org(organizacion);
+
+    console.log("USERNAME: " + req.user.username);
+
+    client.get(`/users/${req.user.username}/orgs`, {}, function (err, status, body, headers) {
+      if (body.length == 0) res.redirect('/fail');
+      var founded = false;
+      console.log("ORGSSSSS")
+      body.forEach((org,inx) => {
+        console.log(org);
+        if (org.login == organizacion) {
+          founded = true;
+          res.redirect('/content');
+        }
+        else if (inx + 1 == body.length && !founded) {
+          res.redirect('/fail');
+        }
+      });
     });
-  });
-}
 
-function setHerokuData (app, callback) {
-  configFile['heroku_url'] = app.web_url;
-  fs.unlink('.config.book.json', function(err) {
-    fs.writeFileSync('.config.book.json', JSON.stringify(configFile, null, '\t'));
-    exec('git remote', (err, out) => {
-      if (out.includes('heroku')) callback();
-      else {
-        exec('git remote add heroku ' + app.git_url, function(err, out) {
-          if (err) callback(err);
-          else callback();
-        });
-      }
-    })
-  });
-}
+});
+
+app.get("/content", (req, res) => {
+  res.render('index')
+});
 
 
-function setup (callback) {
-  exec ('gulp -T', (err, out) => {
-    if (err)
-      exec ('npm install gulp', (err, out) => {
-        var msg = "gulp installed locally";
-        console.log(msg);
-        callback(msg);
-      })
-  })
-  exec ('which heroku', function (err, out) {
-    if (out.length == 0) {
-      console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
-      process.exit();
-    }
-  });
-  if (!fs.existsSync('_book')) {
-    exec('gitbook build', function (err, out) {
-      if (err) console.log(err);
-    });
-  }
-  exec('heroku auth:token', function(err, out) {
-    if (!err) {
-      heroku = new Heroku({
-        token : out.replace(' ','')
-      });
-      existsHerokuApp(heroku_app_name, function (app) {
-        if (app) {
-          setHerokuData(app, (err) => {
-            if (err) callback(err, null);
-            else callback(null,"App already exists. Seting heroku app data. " + heroku_app_name);
-          });
-        }
-        else {
-          heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
-            setHerokuData(app, (err) => {
-              if (err) callback(err, null);
-              else callback(null,"Created heroku app " + heroku_app_name);
-            });
-          }).catch(function(e) {
-            console.log(e);
-          });
-        }
-      });
-    }
-  });
-}
+app.get('/fail', (req, res) => {
+  res.send("<h1 style='color:red;'>FAILED AUTHENTICATION. You are not part of the organization " + organizacion + "</h1>");
+});
 
-module.exports.install = (callback) => {
-  if (configFile['private'] == "yes") {
-    var base_url = 'https://github.com/settings/applications/new?';
-    var name_param_url = 'oauth_application[name]=' + heroku_app_name;
-    var url_param_url = '&oauth_application[url]=' + heroku_url;
-    var desc_param_url = '&oauth_application[description]=' + configFile['description'];
-    var callback_param_url = '&oauth_application[callback_url]=' + heroku_url + '/github/auth/return';
-    var oauth_register_url = base_url + name_param_url + url_param_url + desc_param_url + callback_param_url;
-
-    var canOpenBrowser = false;
-
-    const myURL = new URL(oauth_register_url);
-
-    inquirer.prompt([
-      {
-        type:'input',
-        name: 'nothing',
-        message: 'Now browser will be opened to create oauth app. YOU HAVE TO COPY the app clientID and clientSecret (Press Enter)',
-        filter: function (val) {
-          launcher(myURL.href, { browser: ['chromium','chrome', 'firefox', 'safari'] }, function (e, browser) {
-            if(e)  {
-              copy(myURL.href);
-              console.log(e + " Now just CTRL+V on your browser and press Enter. ");
-              //return console.log(e);
-            }
-            else {
-              canOpenBrowser = true;
-            }
-            //browser.on('stop', function(code){
-            //});
-          });
-          return val;
-        }
-      },
-      {
-        type: 'input',
-        name: 'justClick',
-        message: 'Press Enter to push client ID:',
-        validate: function (val) {
-          canOpenBrowser = true;
-          return true;
-        },
-        when: function() {
-          return !canOpenBrowser;
-        }
-      },
-      {
-        type: 'input',
-        name: 'clientID',
-        message: 'Put the client ID of the oauth App: ',
-        when: function() {
-          return canOpenBrowser;
-        },
-        validate: function (value) {
-          if (!value) return false;
-          return true;
-        }
-      },
-      {
-        type: 'input',
-        name: 'clientSecret',
-        message: 'Put the client Secret of the oauth App: ',
-        validate: function (value) {
-          if (!value) return false;
-          return true;
-        }
-      }]).then((answers) => {
-        var oauth_file = new Tacks(Dir({
-          '.oauth.github.json' : File(JSON.stringify({
-            clientID: answers.clientID,
-            clientSecret: answers.clientSecret,
-            callbackURL: heroku_url + '/github/auth/return'
-          }, null, "\t"))
-        }));
-        oauth_file.create(process.cwd());
-        setup((err, msg) => {
-          callback(err, msg);
-        });
-      });
-  }
-  else {
-    setup();
-  }
-}
-
+app.use(express.static(__dirname + '/_book'));
