@@ -86,7 +86,8 @@ function setup (callback) {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
             setHerokuData(app, (err) => {
               if (err) callback(err, null);
-              else callback(null,"Created heroku app " + heroku_app_name);
+              else if (callback) callback(null,"Created heroku app " + heroku_app_name);
+	      else console.log("Created heroku app " + heroku_app_name);
             });
           }).catch(function(e) {
             console.log("El error")
