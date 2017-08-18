@@ -88,7 +88,8 @@ function setup (callback) {
               else callback(null,"Created heroku app " + heroku_app_name);
             });
           }).catch(function(e) {
-            console.log(e);
+            console.log("El error")
+            console.log(e.message);
           });
         }
       });
