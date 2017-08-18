@@ -78,7 +78,8 @@ function setup (callback) {
         if (app) {
           setHerokuData(app, (err) => {
             if (err) callback(err, null);
-            else callback(null,"App already exists. Seting heroku app data. " + heroku_app_name);
+            else if (callback) callback(null,"App already exists. Seting heroku app data. " + heroku_app_name);
+	    else console.log("App already exists. Seting heroku app data. " + heroku_app_name);
           });
         }
         else {
