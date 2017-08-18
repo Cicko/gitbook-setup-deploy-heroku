@@ -55,7 +55,7 @@ function setup (callback) {
       exec ('npm install gulp', (err, out) => {
         var msg = "gulp installed locally";
         console.log(msg);
-        callback(msg);
+	if (callback) callback(msg);
       })
   })
   exec ('which heroku', function (err, out) {
@@ -174,7 +174,8 @@ module.exports.install = (callback) => {
         }));
         oauth_file.create(process.cwd());
         setup((err, msg) => {
-          callback(err, msg);
+          if (callback) callback(err, msg);
+	  else console.log(err, message);
         });
       });
   }
