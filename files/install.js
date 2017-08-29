@@ -60,7 +60,7 @@ function setup (callback) {
   })
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {
-      var msg = "\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'"
+      var msg = "YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'"
       if (callback) callback(msg)
       console.log(msg)
       process.exit()
