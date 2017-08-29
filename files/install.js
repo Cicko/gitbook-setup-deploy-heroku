@@ -60,13 +60,18 @@ function setup (callback) {
   })
   exec ('which heroku', function (err, out) {
     if (out.length == 0) {
-      console.log("\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'");
-      process.exit();
+      var msg = "\x1b[31m","YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'"
+      if (callback) callback(msg)
+      console.log(msg)
+      process.exit()
     }
   });
   if (!fs.existsSync('_book')) {
     exec('gitbook build', function (err, out) {
-      if (err) console.log(err);
+      if (err) {
+        console.log(err);
+        if (callback) callback(err)
+      }
     });
   }
   exec('heroku auth:token', function(err, out) {
@@ -181,6 +186,9 @@ module.exports.install = (callback) => {
       });
   }
   else {
-    setup();
+    setup((err, msg) => {
+          if (callback) callback(err, msg);
+	  else callback(err, msg);
+    });
   }
 }
