@@ -91,7 +91,7 @@ function setup (callback) {
             });
           }).catch(function(e) {
             console.log("El error")
-            console.log(e.message);
+	    callback(e, null);
           });
         }
       });
@@ -176,7 +176,7 @@ module.exports.install = (callback) => {
         oauth_file.create(process.cwd());
         setup((err, msg) => {
           if (callback) callback(err, msg);
-	  else console.log(err, message);
+	  else callback(err, msg);
         });
       });
   }
