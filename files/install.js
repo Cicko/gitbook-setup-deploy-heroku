@@ -55,15 +55,14 @@ function setup (callback) {
       exec ('npm install gulp', (err, out) => {
         var msg = "gulp module installed locally"
         console.log(msg)
-        if (callback) callback(null, msg)
       })
     }
   })
   exec ('which heroku', function (err, out) {
-    if (out.length == 0) {
-      var msg = "YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'"
-      if (callback) callback(msg)
-      console.log(msg)
+    if (err || out.length == 0) {
+      var err = "YOU HAVE TO INSTALL HEROKU. EXECUTE '$npm install -g heroku'"
+      if (callback) callback(err)
+      console.log(err)
       process.exit()
     }
   })
@@ -83,7 +82,7 @@ function setup (callback) {
       existsHerokuApp(heroku_app_name, function (app) {
         if (app) {
           setHerokuData(app, (err) => {
-            var msg = "App already exists. Seting heroku app data. "
+            var msg = "App already exists. Setting heroku app data. "
             if (err) callback(err)
             else if (callback) callback(null, msg + heroku_app_name)
 	          else console.log(msg + heroku_app_name)
@@ -93,7 +92,10 @@ function setup (callback) {
           heroku.post('/apps', {body: {name: heroku_app_name}}).then(app => {
             setHerokuData(app, (err) => {
               if (err) callback(err)
-              else if (callback) callback(null, "Created heroku app " + heroku_app_name)
+              else if (callback)  {
+                callback(null, "Created heroku app " + heroku_app_name)
+                callback(null, null)
+              }
 	            else console.log("Created heroku app " + heroku_app_name)
             })
           }).catch(function(e) {
@@ -183,14 +185,17 @@ module.exports.install = (callback) => {
         oauth_file.create(process.cwd())
         setup((err, msg) => {
           if (callback) callback(err, msg)
-	        else callback(err, msg)
+          else if (msg) console.log(msg)
+          else if (err) console.log(err)
         })
       })
   }
   else {
     setup((err, msg) => {
-      if (callback) callback(err, msg)
-	    else callback(err, msg)
+      if (!err && !msg && callback) callback(null, null)
+      else if (callback) callback(err, msg)
+	    else if (msg) console.log(msg)
+      else if (err) console.log(err)
     })
   }
 }
